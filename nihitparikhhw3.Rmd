@@ -1,0 +1,119 @@
+---
+title: "Nihit Parikh HW3"
+output: html_notebook
+---
+
+```{r}
+install.packages("tidyverse")
+install.packages("skimr")
+install.packages("ggthemes")
+```
+```{r}
+library(tidyverse)
+library(skimr)
+library(ggthemes)
+```
+```{r}
+setwd(choose.dir())
+```
+
+```{r}
+d0 <- read_csv("pulse2021_puf_33_d1.csv")
+```
+
+```{r}
+d1 <- select(d0, WEEK, EST_MSA, REGION, TBIRTH_YEAR, EGENDER, RHISPANIC,
+   RRACE, EEDUC, MS, THHLD_NUMADLT, THHLD_NUMPER, DOSES, GETVACRV,
+   WHYNOT1, WHYNOT2, WHYNOT3, WHYNOT4, WHYNOT5, WHYNOT6, WHYNOT7,
+   WHYNOT8, WHYNOT9, WHYNOT10, WHYNOT11, WHYNOTB1, WHYNOTB2, WHYNOTB3,
+   WHYNOTB4, WHYNOTB5, WHYNOTB6, HADCOVID, ANYWORK, EIPRV)
+```
+```{r}
+d1$MS = ifelse(d1$MS == -99, NA, d1$MS)
+d1[d1 == -99] <- 0
+d1[d1 == -88] <- 0 # Probably should be NA.
+```
+```{r}
+d1
+```
+
+
+
+```{r}
+skim(d1)
+```
+##GRAPH 1
+## Problem : What would be the Gender-wise distribution for individuals at different education levels?
+##Description : Different education levels should have some impact on indivudals choosing to get vaccinated. The idea of creating a ggplot this distribution was to understand how males & females differ based on the education they have received. That would help gauge how much individual effect do gender and education levels have on the covid vaccination data. Note that education levels have been added as a facet in this bar plot.
+```{r}
+first <- ggplot(data = d1)+
+  geom_bar(mapping = aes(x=d1$EGENDER),fill="red")+
+  facet_wrap(~d1$EEDUC, ncol=3)+
+  labs(
+    title = "Gender wise Distribution for Educational Attainment", 
+    caption = "Bar Plot for Gender Wise Distribution for individuals at different education levels",
+    x="Gender", 
+    y="Count",
+    legend=T
+    )
+```
+```{r}
+first
+```
+
+
+```{r}
+write_csv(d1, "pulse2021_puf_33_d1.csv")
+```
+
+```{r}
+d1$EGENDER <- factor(d1$EGENDER,levels=c(1,2),labels=c("Male","Female"))
+```
+
+```{r}
+d1$RHISPANIC <- factor(d1$RHISPANIC,levels=c(1,2),labels=c("Not Hispanic","Hispanic"))
+```
+```{r}
+d1$GETVACRV <- factor(d1$GETVACRV,levels=c(1,2,3,4,5),labels=c("Definitely","Probably","Not sure","Probably Not","Definitely Not"))
+```
+```{r}
+d1$DOSES <- factor(d1$DOSES,levels=c(1,2),labels=c("One","Two"))
+```
+
+```{r}
+d1$EEDUC <- factor(d1$EEDUC,levels=c(1,2,3,4,5,6,7),labels=c("Less than High School","Some High School","High school Graduate","Some College","Associate Degree","Bachelor's Degree","Graduate Degree"))
+```
+```{r}
+d1$MS <- factor(d1$MS,levels=c(1,2,3,4,5,6),labels=c("Now Married","Widowed","Divorced","Separated","Never Married","NA"))
+```
+
+##GRAPH2
+## Problem : What would be the gender & marital status wise distribution of doses received by our sample?
+#Description : Goign a little further from the first graph, here we get to see the doses received by male & female individuals. I thoguht having the marital status as a facet also would make a difference and bring a new perspective of looking at the data using jitter plot since gender connects with the marital status directly.
+```{r}
+second <- ggplot(data = d1)+
+  geom_jitter(mapping = aes(x=d1$EGENDER,y=d1$DOSES))+
+  facet_wrap(~d1$MS, ncol = 3)+
+  ggtitle("Gender & Marital Status-wise Distribution of Doses Received")+
+  xlab("Gender")+ 
+  ylab("Doses")
+  
+```
+```{r}
+second
+```
+
+##GRAPH 3
+## Problem : What would be the distribution of survey participants based on their birth year?
+#Description : Below shown is a histogram for the survey participants based on their birth year. Since the data doesn't have a lot numerical variables, looking at birth year looks like the only best fit for the histogram. As you can see, the data shows a normal distribution.
+```{r}
+third <- ggplot(d1,aes(x = TBIRTH_YEAR)) +
+  geom_histogram(binwidth = 0.50, color = "black",fill="blue")+
+  ggtitle("Distribution of Birth Years for Survey Participants") +
+  xlab("Birth Year") +
+  ylab("Count")
+```
+```{r}
+third
+```
+

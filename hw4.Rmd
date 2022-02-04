@@ -1,0 +1,145 @@
+---
+title: "hw4 nihit parikh"
+output:
+  word_document: default
+  html_notebook: default
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(tidyverse)
+```
+## Get data and preliminary prep
+
+```{r}
+# setwd(choose.dir())
+d <- read_csv("MKT 382 data 2021 Survey 2.csv")
+```
+```{r}
+typeof(d)
+```
+
+
+```{r}
+colnames(d) <- c(
+  "timestamp",
+  "computer",
+  "phone",
+  "sports",
+  "degree",
+  "humor",
+  "R",
+  "SQL",
+  "Python",
+  "programming",
+  "queso",
+  "band",
+  "instructor",
+  "home",
+  "city",
+  "math",
+  "sleep",
+  "late",
+  "vegetarian",
+  "siblings"
+)
+```
+
+## Problems and solutions
+
+### Problem 1
+
+Generate a data frame (tibble or equivalent) showing the top three `siblings` values (in descending order). 
+The data frame should have only one column: `siblings`. (You can ignore ties.)
+
+```{r}
+d %>%
+  arrange(-siblings) %>%
+  select(siblings) %>%
+  slice_head(n=3)
+```
+
+### Problem 2
+
+Generate a data frame showing the number of survey responses by degree in descending order of those counts.
+
+```{r}
+d %>%
+  group_by(degree) %>%
+  summarize(count=n()) %>%
+  arrange(-count,degree)
+```
+### Problem 3
+
+Generate a data frame of the mean instructor greatness responses by degree.  The data frame should be in descending order of mean greatness.
+
+```{r}
+d %>%
+  group_by(degree) %>%
+  summarize(mean_greatness=mean(instructor)) %>%
+  arrange(-mean_greatness,degree)
+```
+### Problem 4
+
+For Business majors, the count of responses by computer type.
+
+```{r}
+d %>%
+  filter(degree=="Business") %>%
+  group_by(computer) %>%
+  summarize(count=n()) %>%
+  arrange(-count,computer)
+```
+### Problem 5
+
+For Business majors with Macs, the mean number of siblings by queso.  (`mean_siblings` is funny.)
+
+```{r}
+d %>%
+  filter(degree == "Business", computer == "Mac") %>%
+  mutate(mean_siblings=mean(siblings)) %>%
+  group_by(queso)%>%
+  summarize(mean_siblings=mean(siblings))
+```
+
+### Problem 6
+
+Consider a strange metric that is `math+instructor`. This metric, which of course is the
+sum of the "how much you like math" response and the "how great is the instructor response",
+might have tremendous predictive value. Let's investigate.
+
+Compute the mean value of this metric by `computer` value.
+
+```{r}
+d %>%
+  mutate(math_instructor = math + instructor) %>%
+  group_by(computer) %>%
+  summarize(mean(math_instructor))
+```
+
+### Problem 7
+
+Generate a `ggplot` histogram of the `math+instructor` values.
+```{r}
+d%>%
+  mutate(math_instructor = math + instructor) %>%
+  ggplot(aes(math_instructor))+
+  geom_histogram()
+```
+
+
+### Problem 8
+
+For responses reporting one or two siblings, count votes for each `queso`.
+```{r}
+d %>%
+  filter(siblings == "1" | siblings == "2") %>%
+  group_by(queso) %>%
+  summarize(count=n()) %>%
+  arrange(queso,count)
+```
+
+
+
